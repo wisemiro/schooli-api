@@ -1,0 +1,34 @@
+[database]
+server = "192.168.1.229"
+port = 5432
+database = "schooli"
+user = "schooli"
+password = "schooli"
+timeout = 10
+automigrate = false
+secure = false
+log = false
+
+[server]
+address = "192.168.1.229:8090"
+timeout = 10
+prod = false
+
+[redis]
+address = "192.168.1.229"
+port = "6379"
+db = 1
+timeout = 10
+
+[minio]
+user = "minioadmin"
+password = "minioadmin"
+address = "192.168.1.229:9000"
+bucketName = "schooli"
+region = "us-east-1"
+timeout = 10
+
+[secrets]
+ttl = 20
+jwt = "0ff00fe355a24e790512"
+firebasefile = "serviceAccountKey.json"
