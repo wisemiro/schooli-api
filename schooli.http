@@ -1,0 +1,35 @@
+@url = http://192.168.0.101:8090
+
+### register
+
+POST {{url}}/api/v1/auth/signup
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "wise@gmail.com",
+  "password": "password",
+  "phone_number": "12345678",
+}
+
+### login
+# @name login
+POST {{url}}/api/v1/auth/login
+Accept: application/json
+Content-Type: application/json
+
+
+{
+  "email": "wise@gmail.com",
+  "password": "password"
+}
+
+> {%
+    client.global.set("auth_token", response.body.data.access_token);
+    client.global.set("refresh_token", response.body.data.refresh_token);
+%}
+
+@auth_token = {{login.response.body.data.access_token}}
+
+@refresh_token = {{login.response.body.data.refresh_token}}
+
