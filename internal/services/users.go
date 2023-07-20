@@ -44,6 +44,7 @@ func (sq *SQLStore) CreateUser(ctx context.Context, um models.User) (*models.Use
 	}
 	return nil, nil
 }
+
 func (sq *SQLStore) UpdateUser(ctx context.Context, um models.User) error {
 	if err := sq.store.UpdateUser(ctx, db.UpdateUserParams{
 		ID:          um.ID,
@@ -55,6 +56,7 @@ func (sq *SQLStore) UpdateUser(ctx context.Context, um models.User) error {
 	}
 	return nil
 }
+
 func (sq *SQLStore) DeleteUser(ctx context.Context, um models.User) error {
 	if err := sq.store.DeleteUser(ctx,
 		um.ID,
@@ -63,6 +65,7 @@ func (sq *SQLStore) DeleteUser(ctx context.Context, um models.User) error {
 	}
 	return nil
 }
+
 func (sq *SQLStore) ListUsers(ctx context.Context) ([]*models.User, error) {
 	users, err := sq.store.ListUsers(ctx)
 	if err != nil {
@@ -82,6 +85,7 @@ func (sq *SQLStore) ListUsers(ctx context.Context) ([]*models.User, error) {
 	}
 	return us, nil
 }
+
 func (sq *SQLStore) OneUser(ctx context.Context, userID int64) (*models.User, error) {
 	user, err := sq.store.GetUser(ctx, userID)
 	if err != nil {

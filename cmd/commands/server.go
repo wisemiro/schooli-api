@@ -12,7 +12,7 @@ func Server() *cobra.Command {
 		Short:        "Run the Schooli server",
 		SilenceUsage: true,
 	}
-	serverCmd.RunE = func(cmd *cobra.Command, args []string) error {
+	serverCmd.RunE = func(cmd *cobra.Command, _ []string) error {
 		cfg, err := cmd.Flags().GetString("config")
 		if err != nil {
 			return err

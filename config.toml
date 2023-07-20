@@ -1,6 +1,6 @@
 [database]
-server = "192.168.1.229"
-port = 5432
+server = "192.168.1.49"
+port = 6789
 database = "schooli"
 user = "schooli"
 password = "schooli"
@@ -10,12 +10,12 @@ secure = false
 log = false
 
 [server]
-address = "192.168.1.229:8090"
+address = "192.168.1.49:8090"
 timeout = 10
 prod = false
 
 [redis]
-address = "192.168.1.229"
+address = "192.168.1.49"
 port = "6379"
 db = 1
 timeout = 10
@@ -23,7 +23,7 @@ timeout = 10
 [minio]
 user = "minioadmin"
 password = "minioadmin"
-address = "192.168.1.229:9000"
+address = "192.168.1.49:9000"
 bucketName = "schooli"
 region = "us-east-1"
 timeout = 10

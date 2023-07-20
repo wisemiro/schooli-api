@@ -16,6 +16,7 @@ func (rp *Repository) GetUserPayload(_ http.ResponseWriter, r *http.Request) int
 	d := ctx.Value("user")
 	return d.(int64)
 }
+
 func (rp *Repository) GetInt(w http.ResponseWriter, r *http.Request, key string) int64 {
 	id := chi.URLParam(r, key)
 	value, err := strconv.ParseInt(id, 10, 32)
@@ -34,6 +35,7 @@ func (rp *Repository) GetInt(w http.ResponseWriter, r *http.Request, key string)
 
 	return value
 }
+
 func (rp *Repository) UpdateUser() http.HandlerFunc {
 	type request struct {
 		Email       string `json:"email" binding:"required"`
