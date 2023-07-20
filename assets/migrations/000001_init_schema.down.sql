@@ -1,4 +1,4 @@
-package modelsdrop TABLE if EXISTS users,
+drop TABLE if EXISTS users,
 categories,
 products,
 product_variants,
