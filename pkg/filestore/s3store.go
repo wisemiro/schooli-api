@@ -15,8 +15,6 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-//go:generate mockgen -destination=mocks/S3storage.go  -package=mocks fainda/internal/services FileStorageService
-
 type S3Storage struct {
 	client     *minio.Client
 	endpoint   string
