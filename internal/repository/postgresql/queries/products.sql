@@ -261,10 +261,12 @@ select orders.created_at,
     p.default_image,
     u.id,
     u.email,
-    u.phone_number
+    u.phone_number,
+    pv.name
 from orders
     left join order_products op on op.id = orders.order_products_id
     left join products p on p.id = op.product_id
+    left join product_variants pv on pv.id = op.product_variant
     left join users u on u.id = orders.user_id;
 -- 
 -- 
@@ -285,10 +287,12 @@ select orders.created_at,
     p.default_image,
     u.id,
     u.email,
-    u.phone_number
+    u.phone_number,
+    pv.name
 from orders
     left join order_products op on op.id = orders.order_products_id
     left join products p on p.id = op.product_id
+    left join product_variants pv on pv.id = op.product_variant
     left join users u on u.id = orders.user_id
 where orders.user_id = $1;
 -- 

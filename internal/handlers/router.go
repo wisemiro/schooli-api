@@ -99,7 +99,7 @@ func (rp *Repository) SetupRouter() *chi.Mux {
 					r.Put("/{id}", rp.UpdateOrder())
 					r.Delete("/{id}", rp.DeleteOrder())
 					r.Get("/", rp.ListOrders())
-					r.Get("/{id}", rp.GetOrder())
+					// r.Get("/{id}", rp.GetOrder())
 				})
 				// Ratings
 				r.Route("/ratings", func(r chi.Router) {
@@ -162,7 +162,7 @@ func (rp *Repository) SetupRouter() *chi.Mux {
 					r.Put("/{id}", rp.UpdateOrder())
 					r.Delete("/{id}", rp.DeleteOrder())
 					r.Get("/", rp.ListOrders())
-					r.Get("/{id}", rp.GetOrder())
+					r.Get("/{id}", rp.ListUserOrders())
 				})
 				// Ratings
 				r.Route("/ratings", func(r chi.Router) {

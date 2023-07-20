@@ -191,10 +191,28 @@ func (rp *Repository) DeleteOrder() http.HandlerFunc {
 	}
 }
 
-// TODO: by user or device?
 func (rp *Repository) ListOrders() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
+	return func(w http.ResponseWriter, r *http.Request) {
+		order, err := rp.store.ListOrders(r.Context())
+		if err != nil {
+			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+			web.Respond(r.Context(), w, r, e, e.Status)
+			return
+		}
+		data := NewStatusOkResponse(SuccessMessage, order)
+		render.Respond(w, r, data)
+	}
 }
-func (rp *Repository) GetOrder() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {}
+func (rp *Repository) ListUserOrders() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := rp.GetUserPayload(w, r)
+		order, err := rp.store.ListUserOrders(r.Context(), userID)
+		if err != nil {
+			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+			web.Respond(r.Context(), w, r, e, e.Status)
+			return
+		}
+		data := NewStatusOkResponse(SuccessMessage, order)
+		render.Respond(w, r, data)
+	}
 }
