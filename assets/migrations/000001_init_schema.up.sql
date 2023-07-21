@@ -151,18 +151,20 @@ create table if not exists shipping(
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
     deleted_at timestamp with time zone,
-    location text not null,
+    location geometry(POINT) not null,
     address text,
     apartment text,
     phone_number text not null,
     user_id bigint constraint fk_shipping_user_id references users,
     order_id bigint not null constraint fk_shipping_order_id references orders,
+    geo_id bigint constraint fk_geo-user_id references geos,
     status text default 'pending'
 );
 -- 
 -- indexing
 CREATE UNIQUE INDEX shipping_order_id_idx on shipping (order_id);
 CREATE INDEX shipping_status_idx on shipping (status);
+CREATE INDEX users_location_idx ON users USING GIST (location);
 -- TODO: Shipping fee and pick_up? 
 -- 
 -- 
@@ -260,8 +262,3 @@ CREATE EXTENSION fuzzystrmatch;
 CREATE EXTENSION address_standardizer;
 -- Enable US Tiger Geocoder
 CREATE EXTENSION postgis_tiger_geocoder;
-
-### on table add column
-location      geometry(POINT) not null
-### example of index
-CREATE INDEX users_location_idx ON users USING GIST (location);

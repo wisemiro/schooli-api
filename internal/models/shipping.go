@@ -15,3 +15,9 @@ type Shipping struct {
 	Order       Order     `json:"orders"`
 	Status      string    `json:"status"`
 }
+
+type Geo struct {
+	ID        int64   `json:"id"`
+	Latitude  float64 `json:"latitude" `
+	Longitude float64 `json:"longitude"`
+}

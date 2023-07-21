@@ -10,6 +10,7 @@ type Category struct {
 	Name      string    `json:"name"`
 	Image     string    `json:"image"`
 }
+
 type Product struct {
 	ID                   int64                  `json:"id"`
 	CreatedAt            time.Time              `json:"created_at"`
