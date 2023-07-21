@@ -157,7 +157,7 @@ create table if not exists shipping(
     phone_number text not null,
     user_id bigint constraint fk_shipping_user_id references users,
     order_id bigint not null constraint fk_shipping_order_id references orders,
-    geo_id bigint constraint fk_geo-user_id references geos,
+    geo bigint constraint fk_location-shipping_id references geos,
     status text default 'pending'
 );
 -- 
