@@ -550,10 +550,12 @@ select orders.created_at,
     p.default_image,
     u.id,
     u.email,
-    u.phone_number
+    u.phone_number,
+    pv.name
 from orders
     left join order_products op on op.id = orders.order_products_id
     left join products p on p.id = op.product_id
+    left join product_variants pv on pv.id = op.product_variant
     left join users u on u.id = orders.user_id
 `
 
@@ -575,6 +577,7 @@ type ListOrdersRow struct {
 	ID_2            pgtype.Int8        `json:"id_2"`
 	Email           pgtype.Text        `json:"email"`
 	PhoneNumber     pgtype.Text        `json:"phone_number"`
+	Name_2          pgtype.Text        `json:"name_2"`
 }
 
 func (q *Queries) ListOrders(ctx context.Context) ([]*ListOrdersRow, error) {
@@ -604,6 +607,7 @@ func (q *Queries) ListOrders(ctx context.Context) ([]*ListOrdersRow, error) {
 			&i.ID_2,
 			&i.Email,
 			&i.PhoneNumber,
+			&i.Name_2,
 		); err != nil {
 			return nil, err
 		}
@@ -706,10 +710,12 @@ select orders.created_at,
     p.default_image,
     u.id,
     u.email,
-    u.phone_number
+    u.phone_number,
+    pv.name
 from orders
     left join order_products op on op.id = orders.order_products_id
     left join products p on p.id = op.product_id
+    left join product_variants pv on pv.id = op.product_variant
     left join users u on u.id = orders.user_id
 where orders.user_id = $1
 `
@@ -732,6 +738,7 @@ type ListUserOrdersRow struct {
 	ID_2            pgtype.Int8        `json:"id_2"`
 	Email           pgtype.Text        `json:"email"`
 	PhoneNumber     pgtype.Text        `json:"phone_number"`
+	Name_2          pgtype.Text        `json:"name_2"`
 }
 
 func (q *Queries) ListUserOrders(ctx context.Context, userID pgtype.Int8) ([]*ListUserOrdersRow, error) {
@@ -761,6 +768,7 @@ func (q *Queries) ListUserOrders(ctx context.Context, userID pgtype.Int8) ([]*Li
 			&i.ID_2,
 			&i.Email,
 			&i.PhoneNumber,
+			&i.Name_2,
 		); err != nil {
 			return nil, err
 		}

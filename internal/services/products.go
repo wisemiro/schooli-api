@@ -125,7 +125,6 @@ func (sq *SQLStore) ByCategory(ctx context.Context, categoryID int64, lastID int
 			StockCount:    int64(v.StockCount),
 			DefaultImage:  sq.fileStore.BuildFilePath(v.DefaultImage),
 			AverageRating: int(v.AverageRating.Int32),
-			// AvarageRating: int(v.AverageRating.Int32),
 		}
 	}
 	return prod, nil

@@ -18,6 +18,8 @@ type OrderService interface {
 	CreateOrder(ctx context.Context, om models.Order) error
 	UpdateOrder(ctx context.Context, om models.Order) error
 	DeleteOrder(ctx context.Context, orderID int64) error
+	ListOrders(ctx context.Context) ([]*models.Order, error)
+	ListUserOrders(ctx context.Context, userID int64) ([]*models.Order, error)
 }
 
 func (sq *SQLStore) CreateOrderItem(ctx context.Context, om models.OrderProduct) error {
@@ -150,21 +152,69 @@ func (sq *SQLStore) ListOrders(ctx context.Context) ([]*models.Order, error) {
 			OrderProduct: models.OrderProduct{
 				ID: v.ID.Int64,
 				Product: models.Product{
-					ID:                   v.ID_2.Int64,
-					Name:                 v.Name.String,
-					Price:                int64(v.Price.Int32),
-					DiscountPrice:        int64(v.DiscountPrice.Int32),
-					Sku:                  v.Sku.String,
-					DefaultImage:         sq.fileStore.BuildFilePath(v.DefaultImage.String),
-					ProductVariant:       []models.ProductVariant{},
-					ProductSpecification: []models.ProductSpecification{},
+					ID:            v.ID_2.Int64,
+					Name:          v.Name.String,
+					Price:         int64(v.Price.Int32),
+					DiscountPrice: int64(v.DiscountPrice.Int32),
+					Sku:           v.Sku.String,
+					DefaultImage:  sq.fileStore.BuildFilePath(v.DefaultImage.String),
 				},
-				ProductVariant: models.ProductVariant{},
-				Quantity:       int64(v.Quantity.Int32),
-				TotalPrice:     int64(v.TotalPrice.Int32),
-				DeviceID:       v.DeviceID.String,
+				ProductVariant: models.ProductVariant{
+					ID:   v.ProductVariant.Int64,
+					Name: v.Name_2.String,
+				},
+				Quantity:   int64(v.Quantity.Int32),
+				TotalPrice: int64(v.TotalPrice.Int32),
+				DeviceID:   v.DeviceID.String,
+			},
+			User: models.User{
+				ID:          v.ID_2.Int64,
+				Email:       v.Email.String,
+				PhoneNumber: v.PhoneNumber.String,
 			},
 		}
+
+	}
+	return ordersList, nil
+}
+
+func (sq *SQLStore) ListUserOrders(ctx context.Context, userID int64) ([]*models.Order, error) {
+	orders, err := sq.store.ListUserOrders(ctx, pgtype.Int8{Int64: userID, Valid: true})
+	if err != nil {
+		return nil, resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "ProductService.ListUserOrders")
+	}
+	ordersList := make([]*models.Order, len(orders))
+
+	for i, v := range orders {
+		ordersList[i] = &models.Order{
+			CreatedAt:    v.CreatedAt.Time,
+			SerialNumber: v.SerialNumber,
+			GrandTotal:   int64(v.GrandTotal),
+			OrderProduct: models.OrderProduct{
+				ID: v.ID.Int64,
+				Product: models.Product{
+					ID:            v.ID_2.Int64,
+					Name:          v.Name.String,
+					Price:         int64(v.Price.Int32),
+					DiscountPrice: int64(v.DiscountPrice.Int32),
+					Sku:           v.Sku.String,
+					DefaultImage:  sq.fileStore.BuildFilePath(v.DefaultImage.String),
+				},
+				ProductVariant: models.ProductVariant{
+					ID:   v.ProductVariant.Int64,
+					Name: v.Name_2.String,
+				},
+				Quantity:   int64(v.Quantity.Int32),
+				TotalPrice: int64(v.TotalPrice.Int32),
+				DeviceID:   v.DeviceID.String,
+			},
+			User: models.User{
+				ID:          v.ID_2.Int64,
+				Email:       v.Email.String,
+				PhoneNumber: v.PhoneNumber.String,
+			},
+		}
+
 	}
 	return ordersList, nil
 }

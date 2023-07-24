@@ -244,7 +244,6 @@ create table if not exists product_specifications(
     product_id bigint not null constraint fk_product_specifications_product_id references products
 );
 
-
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- Enable PostGIS (as of 3.0 contains just geometry/geography)
 CREATE EXTENSION postgis;
