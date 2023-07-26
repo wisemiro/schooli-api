@@ -1,3 +1,21 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+-- Enable PostGIS (as of 3.0 contains just geometry/geography)
+CREATE EXTENSION postgis;
+-- enable raster support (for 3+)
+CREATE EXTENSION postgis_raster;
+-- Enable Topology
+CREATE EXTENSION postgis_topology;
+-- Enable PostGIS Advanced 3D
+-- and other geoprocessing algorithms
+-- sfcgal not available with all distributions
+CREATE EXTENSION postgis_sfcgal;
+-- fuzzy matching needed for Tiger
+CREATE EXTENSION fuzzystrmatch;
+-- rule based standardizer
+CREATE EXTENSION address_standardizer;
+-- Enable US Tiger Geocoder
+CREATE EXTENSION postgis_tiger_geocoder;
+
 create table if not exists schema_migrations (
     version bigint not null primary key,
     dirty boolean not null
@@ -152,9 +170,6 @@ create table if not exists shipping(
     updated_at timestamp with time zone,
     deleted_at timestamp with time zone,
     location geometry(POINT) not null,
-    address text,
-    apartment text,
-    phone_number text not null,
     user_id bigint constraint fk_shipping_user_id references users,
     order_id bigint not null constraint fk_shipping_order_id references orders,
     status text default 'pending'
@@ -163,8 +178,7 @@ create table if not exists shipping(
 -- indexing
 CREATE UNIQUE INDEX shipping_order_id_idx on shipping (order_id);
 CREATE INDEX shipping_status_idx on shipping (status);
-CREATE INDEX users_location_idx ON users USING GIST (location);
--- TODO: Shipping fee and pick_up? 
+CREATE INDEX shipping_location_idx ON shipping USING GIST (location);
 -- 
 -- 
 --  Wishlist 
@@ -243,20 +257,3 @@ create table if not exists product_specifications(
     product_id bigint not null constraint fk_product_specifications_product_id references products
 );
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
--- Enable PostGIS (as of 3.0 contains just geometry/geography)
-CREATE EXTENSION postgis;
--- enable raster support (for 3+)
-CREATE EXTENSION postgis_raster;
--- Enable Topology
-CREATE EXTENSION postgis_topology;
--- Enable PostGIS Advanced 3D
--- and other geoprocessing algorithms
--- sfcgal not available with all distributions
-CREATE EXTENSION postgis_sfcgal;
--- fuzzy matching needed for Tiger
-CREATE EXTENSION fuzzystrmatch;
--- rule based standardizer
-CREATE EXTENSION address_standardizer;
--- Enable US Tiger Geocoder
-CREATE EXTENSION postgis_tiger_geocoder;
