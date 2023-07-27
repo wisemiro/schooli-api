@@ -15,41 +15,29 @@ const createShipping = `-- name: CreateShipping :exec
 insert into shipping(
         created_at,
         location,
-        address,
-        apartment,
-        phone_number,
         user_id,
         order_id,
         status
     )
 values(
         current_timestamp,
-        $1,
+        ST_GeomFromText($1, 4269),
         $2,
         $3,
-        $4,
-        $5,
-        $6,
-        $7
+        $4
     )
 `
 
 type CreateShippingParams struct {
-	Location    string      `json:"location"`
-	Address     pgtype.Text `json:"address"`
-	Apartment   pgtype.Text `json:"apartment"`
-	PhoneNumber string      `json:"phone_number"`
-	UserID      pgtype.Int8 `json:"user_id"`
-	OrderID     int64       `json:"order_id"`
-	Status      pgtype.Text `json:"status"`
+	StGeomfromtext interface{} `json:"st_geomfromtext"`
+	UserID         pgtype.Int8 `json:"user_id"`
+	OrderID        int64       `json:"order_id"`
+	Status         pgtype.Text `json:"status"`
 }
 
 func (q *Queries) CreateShipping(ctx context.Context, arg CreateShippingParams) error {
 	_, err := q.db.Exec(ctx, createShipping,
-		arg.Location,
-		arg.Address,
-		arg.Apartment,
-		arg.PhoneNumber,
+		arg.StGeomfromtext,
 		arg.UserID,
 		arg.OrderID,
 		arg.Status,
@@ -58,12 +46,11 @@ func (q *Queries) CreateShipping(ctx context.Context, arg CreateShippingParams) 
 }
 
 const listShipping = `-- name: ListShipping :many
-select id, created_at, updated_at, deleted_at, location, address, apartment, phone_number, user_id, order_id, status
+select id, created_at, updated_at, deleted_at, location, user_id, order_id, status
 from shipping
 where status = $1
 `
 
-// TODO
 func (q *Queries) ListShipping(ctx context.Context, status pgtype.Text) ([]*Shipping, error) {
 	rows, err := q.db.Query(ctx, listShipping, status)
 	if err != nil {
@@ -79,9 +66,6 @@ func (q *Queries) ListShipping(ctx context.Context, status pgtype.Text) ([]*Ship
 			&i.UpdatedAt,
 			&i.DeletedAt,
 			&i.Location,
-			&i.Address,
-			&i.Apartment,
-			&i.PhoneNumber,
 			&i.UserID,
 			&i.OrderID,
 			&i.Status,
@@ -99,18 +83,17 @@ func (q *Queries) ListShipping(ctx context.Context, status pgtype.Text) ([]*Ship
 const updateShipping = `-- name: UpdateShipping :exec
 update shipping
 set updated_at = current_timestamp,
-    phone_number = $2,
-    status = $3
+    location = ST_GeomFromText($1, 4269),
+    status = $2
 where id = $1
 `
 
 type UpdateShippingParams struct {
-	ID          int64       `json:"id"`
-	PhoneNumber string      `json:"phone_number"`
-	Status      pgtype.Text `json:"status"`
+	StGeomfromtext interface{} `json:"st_geomfromtext"`
+	Status         pgtype.Text `json:"status"`
 }
 
 func (q *Queries) UpdateShipping(ctx context.Context, arg UpdateShippingParams) error {
-	_, err := q.db.Exec(ctx, updateShipping, arg.ID, arg.PhoneNumber, arg.Status)
+	_, err := q.db.Exec(ctx, updateShipping, arg.StGeomfromtext, arg.Status)
 	return err
 }

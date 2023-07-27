@@ -72,6 +72,8 @@ from products
     left join categories c on c.id = products.id;
 -- 
 -- 
+-- name: DiscountedProducts :many
+SELECT * from products where products.discount_price > 0;
 -- name: ProductsByCategory :many
 select *
 from products

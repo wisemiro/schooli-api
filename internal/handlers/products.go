@@ -220,6 +220,18 @@ func (rp *Repository) ListProducts() http.HandlerFunc {
 		render.Respond(w, r, data)
 	}
 }
+func (rp *Repository) ListDiscountedProducts() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		products, err := rp.store.DiscountedProducts(r.Context())
+		if err != nil {
+			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+			web.Respond(r.Context(), w, r, e, e.Status)
+			return
+		}
+		data := NewStatusOkResponse(SuccessMessage, products)
+		render.Respond(w, r, data)
+	}
+}
 
 func (rp *Repository) GetProduct() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

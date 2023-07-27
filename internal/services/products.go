@@ -15,6 +15,7 @@ type ProductsService interface {
 	UpdateProduct(ctx context.Context, pm models.Product) error
 	DeleteProduct(ctx context.Context, productID int64) error
 	AllProducts(ctx context.Context) ([]*models.Product, error)
+	DiscountedProducts(ctx context.Context) ([]*models.Product, error)
 	ByCategory(ctx context.Context, categoryID int64, lastID int64) ([]*models.Product, error)
 	GetProduct(ctx context.Context, productID int64) (*models.Product, error)
 	//
@@ -82,6 +83,30 @@ func (sq *SQLStore) AllProducts(ctx context.Context) ([]*models.Product, error) 
 	products, err := sq.store.ListProducts(ctx)
 	if err != nil {
 		return nil, resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "ProductService.List")
+	}
+	prod := make([]*models.Product, len(products))
+	for i, v := range products {
+		prod[i] = &models.Product{
+			ID:            v.ID,
+			CreatedAt:     v.CreatedAt.Time,
+			UpdatedAt:     v.UpdatedAt.Time,
+			Name:          v.Name,
+			Price:         int64(v.Price),
+			DiscountPrice: int64(v.DiscountPrice.Int32),
+			Sku:           v.Sku,
+			Description:   v.Description,
+			StockCount:    int64(v.StockCount),
+			DefaultImage:  sq.fileStore.BuildFilePath(v.DefaultImage),
+			AverageRating: int(v.AverageRating.Int32),
+		}
+	}
+	return prod, nil
+}
+
+func (sq *SQLStore) DiscountedProducts(ctx context.Context) ([]*models.Product, error) {
+	products, err := sq.store.DiscountedProducts(ctx)
+	if err != nil {
+		return nil, resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "ProductService.Discounted")
 	}
 	prod := make([]*models.Product, len(products))
 	for i, v := range products {

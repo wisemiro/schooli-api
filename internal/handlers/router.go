@@ -131,6 +131,7 @@ func (rp *Repository) SetupRouter() *chi.Mux {
 				// Products
 				r.Route("/products", func(r chi.Router) {
 					r.Get("/", rp.ListProducts())
+					r.Get("/discount", rp.ListDiscountedProducts())
 					r.Get("/by-category/{id}/{last_id}", rp.ListProductsByCategory())
 					r.Get("/{id}", rp.GetProduct())
 					r.Post("/", rp.AddWishlist())

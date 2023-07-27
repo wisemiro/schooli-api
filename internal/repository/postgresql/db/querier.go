@@ -64,6 +64,9 @@ type Querier interface {
 	DeleteWishlist(ctx context.Context, id int64) error
 	//
 	//
+	DiscountedProducts(ctx context.Context) ([]*Products, error)
+	//
+	//
 	GetCategory(ctx context.Context, id int64) (*Categories, error)
 	//
 	//
@@ -99,7 +102,6 @@ type Querier interface {
 	//
 	ListProducts(ctx context.Context) ([]*ListProductsRow, error)
 	//
-	// TODO
 	ListShipping(ctx context.Context, status pgtype.Text) ([]*Shipping, error)
 	//
 	//
@@ -117,8 +119,6 @@ type Querier interface {
 	//
 	//
 	ProductSpecifications(ctx context.Context, productID int64) ([]*ProductSpecifications, error)
-	//
-	//
 	ProductsByCategory(ctx context.Context, arg ProductsByCategoryParams) ([]*Products, error)
 	//
 	//

@@ -284,6 +284,47 @@ func (q *Queries) DeleteWishlist(ctx context.Context, id int64) error {
 	return err
 }
 
+const discountedProducts = `-- name: DiscountedProducts :many
+SELECT id, created_at, updated_at, deleted_at, average_rating, name, price, discount_price, sku, description, stock_count, min_stock_count, category_id, total_ratings, total_view, default_image from products where products.discount_price > 0
+`
+
+func (q *Queries) DiscountedProducts(ctx context.Context) ([]*Products, error) {
+	rows, err := q.db.Query(ctx, discountedProducts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Products{}
+	for rows.Next() {
+		var i Products
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.AverageRating,
+			&i.Name,
+			&i.Price,
+			&i.DiscountPrice,
+			&i.Sku,
+			&i.Description,
+			&i.StockCount,
+			&i.MinStockCount,
+			&i.CategoryID,
+			&i.TotalRatings,
+			&i.TotalView,
+			&i.DefaultImage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCategory = `-- name: GetCategory :one
 select id, created_at, updated_at, deleted_at, name, image
 from categories

@@ -101,17 +101,14 @@ type SchemaMigrations struct {
 }
 
 type Shipping struct {
-	ID          int64              `json:"id"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt   pgtype.Timestamptz `json:"deleted_at"`
-	Location    string             `json:"location"`
-	Address     pgtype.Text        `json:"address"`
-	Apartment   pgtype.Text        `json:"apartment"`
-	PhoneNumber string             `json:"phone_number"`
-	UserID      pgtype.Int8        `json:"user_id"`
-	OrderID     int64              `json:"order_id"`
-	Status      pgtype.Text        `json:"status"`
+	ID        int64              `json:"id"`
+	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
+	Location  interface{}        `json:"location"`
+	UserID    pgtype.Int8        `json:"user_id"`
+	OrderID   int64              `json:"order_id"`
+	Status    pgtype.Text        `json:"status"`
 }
 
 type Users struct {
