@@ -13,19 +13,19 @@ import (
 
 const createOrder = `-- name: CreateOrder :exec
 insert into orders(
-        created_at,
-        grand_total,
-        serial_number,
-        shipping_address,
-        user_id
-    )
+    created_at,
+    grand_total,
+    serial_number,
+    shipping_address,
+    user_id
+  )
 values(
-        current_timestamp,
-        $1,
-        $2,
-        $3,
-        $4
-    )
+    current_timestamp,
+    $1,
+    $2,
+    $3,
+    $4
+  )
 `
 
 type CreateOrderParams struct {
@@ -47,21 +47,21 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) error 
 
 const createOrderProduct = `-- name: CreateOrderProduct :exec
 insert into order_products(
-        created_at,
-        quantity,
-        total_price,
-        product_variants,
-        product_id,
-        order_id
-    )
+    created_at,
+    quantity,
+    total_price,
+    product_variants,
+    product_id,
+    order_id
+  )
 values(
-        current_timestamp,
-        $1,
-        $2,
-        $3,
-        $4,
-        $5
-    )
+    current_timestamp,
+    $1,
+    $2,
+    $3,
+    $4,
+    $5
+  )
 `
 
 type CreateOrderProductParams struct {
@@ -105,31 +105,34 @@ func (q *Queries) DeleteOrderProduct(ctx context.Context, id int64) error {
 
 const getOrderProduct = `-- name: GetOrderProduct :one
 select p.id,
-    p.created_at,
-    p.updated_at,
-    p.name,
-    p.price,
-    p.discount_price,
-    p.sku,
-    p.description,
-    p.category_id,
-    p.default_image,
-    order_products.id,
-    order_products.total_price,
-    order_products.quantity,
-        (
-        SELECT json_agg(
-            json_build_object(
-                'id', v.id,
-                'name', v.name,
-                'type', v.type
-            )
+  p.created_at,
+  p.updated_at,
+  p.name,
+  p.price,
+  p.discount_price,
+  p.sku,
+  p.description,
+  p.category_id,
+  p.default_image,
+  order_products.id,
+  order_products.total_price,
+  order_products.quantity,
+  (
+    SELECT json_agg(
+        json_build_object(
+          'id',
+          v.id,
+          'name',
+          v.name,
+          'type',
+          v.type
         )
-        FROM product_variants v
-        WHERE v.id = ANY(order_products.product_variants)
-    ) AS product_variants
+      )
+    FROM product_variants v
+    WHERE v.id = ANY(order_products.product_variants)
+  ) AS product_variants
 from order_products
-    left join products p on p.id = order_products.product_id
+  left join products p on p.id = order_products.product_id
 where order_products.id = $1
 `
 
@@ -174,31 +177,34 @@ func (q *Queries) GetOrderProduct(ctx context.Context, id int64) (*GetOrderProdu
 
 const listOrderProducts = `-- name: ListOrderProducts :many
 select p.id,
-    p.created_at,
-    p.updated_at,
-    p.name,
-    p.price,
-    p.discount_price,
-    p.sku,
-    p.description,
-    p.category_id,
-    p.default_image,
-    order_products.id,
-    order_products.total_price,
-    order_products.quantity,
-        (
-        SELECT json_agg(
-            json_build_object(
-                'id', v.id,
-                'name', v.name,
-                'type', v.type
-            )
+  p.created_at,
+  p.updated_at,
+  p.name,
+  p.price,
+  p.discount_price,
+  p.sku,
+  p.description,
+  p.category_id,
+  p.default_image,
+  order_products.id,
+  order_products.total_price,
+  order_products.quantity,
+  (
+    SELECT json_agg(
+        json_build_object(
+          'id',
+          v.id,
+          'name',
+          v.name,
+          'type',
+          v.type
         )
-        FROM product_variants v
-        WHERE v.id = ANY(order_products.product_variants)
-    ) AS product_variants
+      )
+    FROM product_variants v
+    WHERE v.id = ANY(order_products.product_variants)
+  ) AS product_variants
 from order_products
-    left join products p on p.id = order_products.product_id
+  left join products p on p.id = order_products.product_id
 `
 
 type ListOrderProductsRow struct {
@@ -254,8 +260,7 @@ func (q *Queries) ListOrderProducts(ctx context.Context) ([]*ListOrderProductsRo
 }
 
 const listOrders = `-- name: ListOrders :many
-select
-  p.id,
+select p.id,
   p.created_at,
   p.updated_at,
   p.name,
@@ -280,17 +285,13 @@ select
   st_x(s.location) as latitude,
   st_y(s.location) as longitude,
   (
-    SELECT
-      json_agg(
+    SELECT json_agg(
         json_build_object('id', v.id, 'name', v.name, 'type', v.type)
       )
-    FROM
-      product_variants v
-    WHERE
-      v.id = ANY(order_products.product_variants)
+    FROM product_variants v
+    WHERE v.id = ANY(order_products.product_variants)
   ) AS product_variants
-from
-  order_products
+from order_products
   left join products p on p.id = order_products.product_id
   left join users u on u.id = order_products.user_id
   left join shipping s on s.id = orders.shipping_address
@@ -372,8 +373,7 @@ func (q *Queries) ListOrders(ctx context.Context) ([]*ListOrdersRow, error) {
 }
 
 const listUserOrders = `-- name: ListUserOrders :many
-select
-  p.id,
+select p.id,
   p.created_at,
   p.updated_at,
   p.name,
@@ -398,17 +398,13 @@ select
   st_x(s.location) as latitude,
   st_y(s.location) as longitude,
   (
-    SELECT
-      json_agg(
+    SELECT json_agg(
         json_build_object('id', v.id, 'name', v.name, 'type', v.type)
       )
-    FROM
-      product_variants v
-    WHERE
-      v.id = ANY(order_products.product_variants)
+    FROM product_variants v
+    WHERE v.id = ANY(order_products.product_variants)
   ) AS product_variants
-from
-  order_products
+from order_products
   left join products p on p.id = order_products.product_id
   left join users u on u.id = order_products.user_id
   left join shipping s on s.id = orders.shipping_address
@@ -490,12 +486,13 @@ func (q *Queries) ListUserOrders(ctx context.Context, userID pgtype.Int8) ([]*Li
 	return items, nil
 }
 
-const updateOrder = `-- name: UpdateOrder :exec
+const updateOrder = `-- name: UpdateOrder :one
 update orders
 set updated_at = current_timestamp,
-    grand_total = $2,
-    confirmed = $3
+  grand_total = $2,
+  confirmed = $3
 where id = $1
+returning orders.user_id
 `
 
 type UpdateOrderParams struct {
@@ -504,17 +501,19 @@ type UpdateOrderParams struct {
 	Confirmed  pgtype.Bool `json:"confirmed"`
 }
 
-func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) error {
-	_, err := q.db.Exec(ctx, updateOrder, arg.ID, arg.GrandTotal, arg.Confirmed)
-	return err
+func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) (pgtype.Int8, error) {
+	row := q.db.QueryRow(ctx, updateOrder, arg.ID, arg.GrandTotal, arg.Confirmed)
+	var user_id pgtype.Int8
+	err := row.Scan(&user_id)
+	return user_id, err
 }
 
 const updateOrderProduct = `-- name: UpdateOrderProduct :exec
 update order_products
 set updated_at = current_timestamp,
-    quantity = $2,
-    total_price = $3,
-    product_variants = $4
+  quantity = $2,
+  total_price = $3,
+  product_variants = $4
 where id = $1
 `
 

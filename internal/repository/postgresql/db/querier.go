@@ -14,6 +14,9 @@ type Querier interface {
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) error
 	//
 	//
+	CreateDevice(ctx context.Context, arg CreateDeviceParams) error
+	//
+	//
 	CreateOrder(ctx context.Context, arg CreateOrderParams) error
 	//
 	//
@@ -68,6 +71,9 @@ type Querier interface {
 	//
 	//
 	GetCategory(ctx context.Context, id int64) (*Categories, error)
+	//
+	//
+	GetOneDevice(ctx context.Context, userID int64) (*Devices, error)
 	//
 	//
 	GetOrderProduct(ctx context.Context, id int64) (*GetOrderProductRow, error)
@@ -127,7 +133,10 @@ type Querier interface {
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error
 	//
 	//
-	UpdateOrder(ctx context.Context, arg UpdateOrderParams) error
+	UpdateDevice(ctx context.Context, arg UpdateDeviceParams) error
+	//
+	//
+	UpdateOrder(ctx context.Context, arg UpdateOrderParams) (pgtype.Int8, error)
 	//
 	//
 	UpdateOrderProduct(ctx context.Context, arg UpdateOrderProductParams) error

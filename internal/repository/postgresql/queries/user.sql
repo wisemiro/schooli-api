@@ -50,3 +50,20 @@ WHERE email = @email
     AND "users"."deleted_at" IS NULL
 ORDER BY "users"."id"
 LIMIT 1;
+-- 
+-- 
+-- name: CreateDevice :exec
+insert into devices(user_id, device)
+values(@user_id, @device);
+-- 
+-- 
+-- name: GetOneDevice :one 
+select *
+from devices
+where devices.user_id = $1;
+-- 
+-- 
+-- name: UpdateDevice :exec
+update devices
+set device = @device
+where user_id = $1;

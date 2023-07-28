@@ -10,6 +10,7 @@ import (
 	"schooli-api/cmd/config"
 	"schooli-api/internal/repository/postgresql/db"
 	"schooli-api/pkg/filestore"
+	"schooli-api/pkg/worker"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -34,6 +35,7 @@ type SQLStore struct {
 	fileStore filestore.FileStorage
 	log       *slog.Logger
 	cfg       config.Config
+	worker    worker.TaskDistributor
 }
 
 func NewSQLStore(cfg config.Config, log *slog.Logger, storage filestore.FileStorage) (*SQLStore, error) {

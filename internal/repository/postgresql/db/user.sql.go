@@ -11,6 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createDevice = `-- name: CreateDevice :exec
+insert into devices(user_id, device)
+values($1, $2)
+`
+
+type CreateDeviceParams struct {
+	UserID int64  `json:"user_id"`
+	Device string `json:"device"`
+}
+
+func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) error {
+	_, err := q.db.Exec(ctx, createDevice, arg.UserID, arg.Device)
+	return err
+}
+
 const createUser = `-- name: CreateUser :exec
 insert into users(created_at, email, phone_number, password_hash)
 values(
@@ -40,6 +55,24 @@ where id = $1
 func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
+}
+
+const getOneDevice = `-- name: GetOneDevice :one
+select id, created_at, user_id, device
+from devices
+where devices.user_id = $1
+`
+
+func (q *Queries) GetOneDevice(ctx context.Context, userID int64) (*Devices, error) {
+	row := q.db.QueryRow(ctx, getOneDevice, userID)
+	var i Devices
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UserID,
+		&i.Device,
+	)
+	return &i, err
 }
 
 const getUser = `-- name: GetUser :one
@@ -131,6 +164,22 @@ func (q *Queries) ListUsers(ctx context.Context) ([]*Users, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateDevice = `-- name: UpdateDevice :exec
+update devices
+set device = $2
+where user_id = $1
+`
+
+type UpdateDeviceParams struct {
+	UserID int64  `json:"user_id"`
+	Device string `json:"device"`
+}
+
+func (q *Queries) UpdateDevice(ctx context.Context, arg UpdateDeviceParams) error {
+	_, err := q.db.Exec(ctx, updateDevice, arg.UserID, arg.Device)
+	return err
 }
 
 const updateUser = `-- name: UpdateUser :exec

@@ -14,6 +14,8 @@ import (
 	"schooli-api/pkg/cache"
 	"schooli-api/pkg/filestore"
 	"schooli-api/pkg/logger"
+	"schooli-api/pkg/notifications"
+	"schooli-api/pkg/worker"
 	"sync"
 	"syscall"
 	"time"
@@ -24,15 +26,17 @@ import (
 )
 
 type Application struct {
-	logger      *slog.Logger
-	mux         *chi.Mux
-	wg          *sync.WaitGroup
-	fileStorage filestore.FileStorage
-	cache       cache.Store
-	appCtx      *config.AppContext
-	redisOpt    asynq.RedisClientOpt
-	conf        config.Config
-	store       services.Store
+	logger             *slog.Logger
+	mux                *chi.Mux
+	wg                 *sync.WaitGroup
+	fileStorage        filestore.FileStorage
+	cache              cache.Store
+	appCtx             *config.AppContext
+	redisOpt           asynq.RedisClientOpt
+	conf               config.Config
+	store              services.Store
+	worker             worker.TaskDistributor
+	notificationEngine *notifications.NotificationEngine
 }
 
 func StartApplication(loc string) (*Application, error) {
@@ -82,6 +86,7 @@ func StartApplication(loc string) (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
+	taskDistributor := worker.NewRedisTaskDistributor(asynq.RedisClientOpt{Addr: fmt.Sprintf("%s:%s", conf.Redis.Address, conf.Redis.Port)})
 
 	store, err := services.NewSQLStore(conf, l, s3Storage)
 	if err != nil {
@@ -94,6 +99,11 @@ func StartApplication(loc string) (*Application, error) {
 	)
 
 	mux := allServices.SetupRouter()
+	messenger, err := notifications.NewNotificationEngine(conf.Secrets.FireBaseFile)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Application{
 		logger:      l,
 		mux:         mux,
@@ -104,8 +114,10 @@ func StartApplication(loc string) (*Application, error) {
 		redisOpt: asynq.RedisClientOpt{
 			Addr: fmt.Sprintf("%s:%s", conf.Redis.Address, conf.Redis.Port),
 		},
-		conf:  conf,
-		store: store,
+		conf:               conf,
+		store:              store,
+		worker:             taskDistributor,
+		notificationEngine: messenger,
 	}, nil
 }
 

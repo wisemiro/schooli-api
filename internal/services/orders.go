@@ -125,18 +125,31 @@ func (sq *SQLStore) CreateOrder(ctx context.Context, om models.Order) error {
 	return nil
 }
 func (sq *SQLStore) UpdateOrder(ctx context.Context, om models.Order) error {
-	if err := sq.store.UpdateOrder(ctx, db.UpdateOrderParams{
+	data, err := sq.store.UpdateOrder(ctx, db.UpdateOrderParams{
 		GrandTotal: int32(om.GrandTotal),
 		Confirmed:  pgtype.Bool{Bool: om.Confirmed, Valid: true},
-	}); err != nil {
-		return resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "OrdersService.CreateOrder")
+	})
+	if err != nil {
+		return resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "OrdersService.UpdateOrder")
+	}
+	// TODO: Get user device
+	device, err := sq.store.GetOneDevice(ctx, data.Int64)
+	if err != nil {
+		return nil //TODO: NO!
+	}
+	if om.Confirmed {
+		return sq.worker.DistributeTaskSendNotification(ctx, models.Notifications{
+			DeviceID: int32(device.ID),
+			Title:    "Order approved",
+			Body:     "",
+		})
 	}
 	return nil
 }
 
 func (sq *SQLStore) DeleteOrder(ctx context.Context, orderID int64) error {
 	if err := sq.store.DeleteOrder(ctx, orderID); err != nil {
-		return resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "OrdersService.CreateOrder")
+		return resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "OrdersService.DeleteOrder")
 	}
 	return nil
 }
