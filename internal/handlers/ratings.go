@@ -69,7 +69,7 @@ func (rp *Repository) UpdateRating() http.HandlerFunc {
 			web.Respond(r.Context(), w, r, e, e.Status)
 			return
 		}
-		data := NewStatusCreatedResponse(SuccessMessage, nil)
+		data := NewStatusOkResponse(SuccessMessage, nil)
 		render.Respond(w, r, data)
 	}
 }

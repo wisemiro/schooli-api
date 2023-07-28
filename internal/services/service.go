@@ -25,6 +25,7 @@ type Store interface {
 	ProductsService
 	OrderService
 	RatingsService
+	ShippingService
 }
 
 type SQLStore struct {

@@ -113,6 +113,13 @@ func (rp *Repository) SetupRouter() *chi.Mux {
 					r.Delete("/", rp.DeleteCarousel())
 					r.Delete("/image/", rp.DeleteCarouselImage())
 				})
+				// shipping
+				r.Route("/shipping", func(r chi.Router) {
+					r.Post("/", rp.CreateShippingAddress())
+					r.Put("/{id}", rp.UpdateShippingAddress())
+					r.Get("/user", rp.UserShippingAddresses())
+					r.Get("/", rp.ListShippingAddresses())
+				})
 			})
 			/* Client routes
 			------ /api/v1/client/-------
@@ -176,6 +183,13 @@ func (rp *Repository) SetupRouter() *chi.Mux {
 				// carousel
 				r.Route("/carousel", func(r chi.Router) {
 					r.Get("/", rp.ListCarouselImages())
+				})
+				// shipping
+				r.Route("/shipping", func(r chi.Router) {
+					r.Use(rp.AuthMiddleware)
+					r.Post("/", rp.CreateShippingAddress())
+					r.Put("/{id}", rp.UpdateShippingAddress())
+					r.Get("/", rp.UserShippingAddresses())
 				})
 			})
 		})

@@ -43,27 +43,28 @@ type ProductVariant struct {
 }
 
 type OrderProduct struct {
-	ID             int64          `json:"id"`
-	CreatedAt      time.Time      `json:"created_at"`
-	UpdatedAt      time.Time      `json:"updated_at"`
-	DeletedAt      time.Time      `json:"-"`
-	Product        Product        `json:"product"`
-	ProductVariant ProductVariant `json:"product_variant"`
-	Quantity       int64          `json:"quantity"`
-	TotalPrice     int64          `json:"total_price"`
-	DeviceID       string         `json:"device_id"`
+	ID              int64          `json:"id"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       time.Time      `json:"-"`
+	Product         Product        `json:"product"`
+	ProductVariants []int32        `json:"product_variants"`
+	Variants        []ProductVariant `json:"variants"`
+	Quantity        int64          `json:"quantity"`
+	TotalPrice      int64          `json:"total_price"`
+	Order           Order          `json:"order_id"`
 }
 
 type Order struct {
-	ID           int64        `json:"id"`
-	CreatedAt    time.Time    `json:"created_at"`
-	UpdatedAt    time.Time    `json:"updated_at"`
-	DeletedAt    time.Time    `json:"-"`
-	OrderProduct OrderProduct `json:"order_product"`
-	SerialNumber string       `json:"serial_number"`
-	GrandTotal   int64        `json:"grand_total"`
-	UserID       int64        `json:"user_id"`
-	User         User         `json:"user"`
+	ID           int64     `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	DeletedAt    time.Time `json:"-"`
+	SerialNumber string    `json:"serial_number"`
+	GrandTotal   int64     `json:"grand_total"`
+	User         User      `json:"user"`
+	Shipping     Shipping  `json:"shipping_address"`
+	Confirmed    bool      `json:"confirmed"`
 }
 
 type ProductSpecification struct {

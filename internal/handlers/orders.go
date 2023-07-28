@@ -13,11 +13,10 @@ import (
 
 func (rp *Repository) CreateOrderItem() http.HandlerFunc {
 	type request struct {
-		ProductID  int64  `json:"product_id"`
-		VariantID  int64  `json:"variant_id"`
-		Quantity   int64  `json:"quantity"`
-		TotalPrice int64  `json:"total_price"`
-		DeviceID   string `json:"device_id"`
+		ProductID       int64   `json:"product_id"`
+		ProductVariants []int32 `json:"product_variants"`
+		Quantity        int64   `json:"quantity"`
+		TotalPrice      int64   `json:"total_price"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req request
@@ -30,12 +29,9 @@ func (rp *Repository) CreateOrderItem() http.HandlerFunc {
 			Product: models.Product{
 				ID: req.ProductID,
 			},
-			ProductVariant: models.ProductVariant{
-				ID: req.VariantID,
-			},
-			Quantity:   req.Quantity,
-			TotalPrice: req.TotalPrice,
-			DeviceID:   req.DeviceID,
+			ProductVariants: req.ProductVariants,
+			Quantity:        req.Quantity,
+			TotalPrice:      req.TotalPrice,
 		})
 		if err != nil {
 			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
@@ -49,11 +45,10 @@ func (rp *Repository) CreateOrderItem() http.HandlerFunc {
 
 func (rp *Repository) UpdateOrderItem() http.HandlerFunc {
 	type request struct {
-		ProductID  int64  `json:"product_id"`
-		VariantID  int64  `json:"variant_id"`
-		Quantity   int64  `json:"quantity"`
-		TotalPrice int64  `json:"total_price"`
-		DeviceID   string `json:"device_id"`
+		ProductID       int64   `json:"product_id"`
+		ProductVariants []int32 `json:"product_variants"`
+		Quantity        int64   `json:"quantity"`
+		TotalPrice      int64   `json:"total_price"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req request
@@ -68,12 +63,9 @@ func (rp *Repository) UpdateOrderItem() http.HandlerFunc {
 			Product: models.Product{
 				ID: req.ProductID,
 			},
-			ProductVariant: models.ProductVariant{
-				ID: req.VariantID,
-			},
-			Quantity:   req.Quantity,
-			TotalPrice: req.TotalPrice,
-			DeviceID:   req.DeviceID,
+			ProductVariants: req.ProductVariants,
+			Quantity:        req.Quantity,
+			TotalPrice:      req.TotalPrice,
 		})
 		if err != nil {
 			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
@@ -129,25 +121,28 @@ func (rp *Repository) GetOrderItem() http.HandlerFunc {
 // Orders
 func (rp *Repository) CreateOrder() http.HandlerFunc {
 	type request struct {
-		OrderProductID int64  `json:"order_product_id"`
-		GrandTotal     int64  `json:"grand_total"`
-		SerialNumber   string `json:"serial_number"`
+		GrandTotal   int64  `json:"grand_total"`
+		SerialNumber string `json:"serial_number"`
+		ShippingID   int64  `json:"shipping_address"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req request
+		userID := rp.GetUserPayload(w, r)
 		if err := render.DecodeJSON(r.Body, &req); err != nil {
 			e := resterrors.NewBadRequestError(resterrors.ErrorInvalidJSONBody)
 			web.Respond(r.Context(), w, r, e, e.Status)
 			return
 		}
 		err := rp.store.CreateOrder(r.Context(), models.Order{
-			OrderProduct: models.OrderProduct{
-				ID: req.OrderProductID,
+			User: models.User{
+				ID: userID,
 			},
 			SerialNumber: req.SerialNumber,
 			GrandTotal:   req.GrandTotal,
+			Shipping: models.Shipping{
+				ID: req.ShippingID,
+			},
 		})
-
 		if err != nil {
 			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
 			web.Respond(r.Context(), w, r, e, e.Status)
@@ -160,8 +155,8 @@ func (rp *Repository) CreateOrder() http.HandlerFunc {
 
 func (rp *Repository) UpdateOrder() http.HandlerFunc {
 	type request struct {
-		OrderProductID int64 `json:"order_product_id"`
-		GrandTotal     int64 `json:"grand_total"`
+		GrandTotal int64 `json:"grand_total"`
+		Confirmed  bool  `json:"confirmed"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req request
@@ -172,9 +167,9 @@ func (rp *Repository) UpdateOrder() http.HandlerFunc {
 			return
 		}
 		err := rp.store.UpdateOrder(r.Context(), models.Order{
-			ID:           int64(id),
-			OrderProduct: models.OrderProduct{},
-			GrandTotal:   req.GrandTotal,
+			ID:         int64(id),
+			GrandTotal: req.GrandTotal,
+			Confirmed:  req.Confirmed,
 		})
 		if err != nil {
 			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)

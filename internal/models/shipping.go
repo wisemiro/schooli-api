@@ -8,9 +8,7 @@ type Shipping struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	DeletedAt time.Time `json:"-"`
 	User      User      `json:"user"`
-	Order     Order     `json:"orders"`
-	Status    string    `json:"status"`
-	Geo Geo `json:"geo"`
+	Geo       Geo       `json:"geo"`
 }
 
 type Geo struct {

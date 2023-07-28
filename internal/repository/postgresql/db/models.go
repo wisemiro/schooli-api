@@ -25,24 +25,26 @@ type Devices struct {
 }
 
 type OrderProducts struct {
-	ID             int64              `json:"id"`
-	CreatedAt      pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
-	DeletedAt      pgtype.Timestamptz `json:"deleted_at"`
-	Quantity       int32              `json:"quantity"`
-	TotalPrice     int32              `json:"total_price"`
-	DeviceID       string             `json:"device_id"`
-	ProductVariant pgtype.Int8        `json:"product_variant"`
-	ProductID      int64              `json:"product_id"`
+	ID              int64              `json:"id"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
+	Quantity        int32              `json:"quantity"`
+	TotalPrice      int32              `json:"total_price"`
+	ProductVariants []int32            `json:"product_variants"`
+	ProductID       int64              `json:"product_id"`
+	OrderID         pgtype.Int8        `json:"order_id"`
 }
 
 type Orders struct {
+	ID              int64              `json:"id"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 	GrandTotal      int32              `json:"grand_total"`
 	SerialNumber    string             `json:"serial_number"`
-	OrderProductsID int64              `json:"order_products_id"`
 	UserID          pgtype.Int8        `json:"user_id"`
+	ShippingAddress int64              `json:"shipping_address"`
+	Confirmed       pgtype.Bool        `json:"confirmed"`
 }
 
 type ProductRatings struct {
@@ -106,9 +108,7 @@ type Shipping struct {
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
 	DeletedAt pgtype.Timestamptz `json:"deleted_at"`
 	Location  interface{}        `json:"location"`
-	UserID    pgtype.Int8        `json:"user_id"`
-	OrderID   int64              `json:"order_id"`
-	Status    pgtype.Text        `json:"status"`
+	UserID    int64              `json:"user_id"`
 }
 
 type Users struct {

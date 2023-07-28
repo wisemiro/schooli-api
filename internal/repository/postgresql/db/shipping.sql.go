@@ -15,60 +15,121 @@ const createShipping = `-- name: CreateShipping :exec
 insert into shipping(
         created_at,
         location,
-        user_id,
-        order_id,
-        status
+        user_id
     )
 values(
         current_timestamp,
         ST_GeomFromText($1, 4269),
-        $2,
-        $3,
-        $4
+        $2
     )
 `
 
 type CreateShippingParams struct {
 	StGeomfromtext interface{} `json:"st_geomfromtext"`
-	UserID         pgtype.Int8 `json:"user_id"`
-	OrderID        int64       `json:"order_id"`
-	Status         pgtype.Text `json:"status"`
+	UserID         int64       `json:"user_id"`
 }
 
 func (q *Queries) CreateShipping(ctx context.Context, arg CreateShippingParams) error {
-	_, err := q.db.Exec(ctx, createShipping,
-		arg.StGeomfromtext,
-		arg.UserID,
-		arg.OrderID,
-		arg.Status,
-	)
+	_, err := q.db.Exec(ctx, createShipping, arg.StGeomfromtext, arg.UserID)
 	return err
 }
 
 const listShipping = `-- name: ListShipping :many
-select id, created_at, updated_at, deleted_at, location, user_id, order_id, status
+select shipping.id,
+    shipping.created_at,
+    shipping.updated_at,
+    st_x(shipping.location) as latitude,
+    st_y(shipping.location) as longitude,
+    u.id,
+    u.email,
+    u.phone_number
 from shipping
-where status = $1
+    left join users u on u.id = shipping.user_id
 `
 
-func (q *Queries) ListShipping(ctx context.Context, status pgtype.Text) ([]*Shipping, error) {
-	rows, err := q.db.Query(ctx, listShipping, status)
+type ListShippingRow struct {
+	ID          int64              `json:"id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	Latitude    interface{}        `json:"latitude"`
+	Longitude   interface{}        `json:"longitude"`
+	ID_2        pgtype.Int8        `json:"id_2"`
+	Email       pgtype.Text        `json:"email"`
+	PhoneNumber pgtype.Text        `json:"phone_number"`
+}
+
+func (q *Queries) ListShipping(ctx context.Context) ([]*ListShippingRow, error) {
+	rows, err := q.db.Query(ctx, listShipping)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []*Shipping{}
+	items := []*ListShippingRow{}
 	for rows.Next() {
-		var i Shipping
+		var i ListShippingRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.DeletedAt,
-			&i.Location,
-			&i.UserID,
-			&i.OrderID,
-			&i.Status,
+			&i.Latitude,
+			&i.Longitude,
+			&i.ID_2,
+			&i.Email,
+			&i.PhoneNumber,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUserShipping = `-- name: ListUserShipping :many
+select shipping.id,
+    shipping.created_at,
+    shipping.updated_at,
+    st_x(shipping.location) as latitude,
+    st_y(shipping.location) as longitude,
+    u.id,
+    u.email,
+    u.phone_number
+from shipping
+    left join users u on u.id = shipping.user_id
+where shipping.user_id = $1
+`
+
+type ListUserShippingRow struct {
+	ID          int64              `json:"id"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	Latitude    interface{}        `json:"latitude"`
+	Longitude   interface{}        `json:"longitude"`
+	ID_2        pgtype.Int8        `json:"id_2"`
+	Email       pgtype.Text        `json:"email"`
+	PhoneNumber pgtype.Text        `json:"phone_number"`
+}
+
+func (q *Queries) ListUserShipping(ctx context.Context, userID int64) ([]*ListUserShippingRow, error) {
+	rows, err := q.db.Query(ctx, listUserShipping, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListUserShippingRow{}
+	for rows.Next() {
+		var i ListUserShippingRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Latitude,
+			&i.Longitude,
+			&i.ID_2,
+			&i.Email,
+			&i.PhoneNumber,
 		); err != nil {
 			return nil, err
 		}
@@ -83,17 +144,16 @@ func (q *Queries) ListShipping(ctx context.Context, status pgtype.Text) ([]*Ship
 const updateShipping = `-- name: UpdateShipping :exec
 update shipping
 set updated_at = current_timestamp,
-    location = ST_GeomFromText($1, 4269),
-    status = $2
-where id = $1
+    location = ST_GeomFromText($1, 4269)
+where shipping.id = $2
 `
 
 type UpdateShippingParams struct {
 	StGeomfromtext interface{} `json:"st_geomfromtext"`
-	Status         pgtype.Text `json:"status"`
+	ID             int64       `json:"id"`
 }
 
 func (q *Queries) UpdateShipping(ctx context.Context, arg UpdateShippingParams) error {
-	_, err := q.db.Exec(ctx, updateShipping, arg.StGeomfromtext, arg.Status)
+	_, err := q.db.Exec(ctx, updateShipping, arg.StGeomfromtext, arg.ID)
 	return err
 }

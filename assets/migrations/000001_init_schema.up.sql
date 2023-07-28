@@ -110,6 +110,40 @@ create table if not exists product_variants(
 CREATE UNIQUE INDEX product_variants_name_idx on product_variants (name);
 -- 
 -- 
+-- Shipping
+create table if not exists shipping(
+    id bigserial primary key,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone,
+    deleted_at timestamp with time zone,
+    location geometry(POINT) not null,
+    user_id bigint not null constraint fk_shipping_user_id references users
+);
+-- 
+-- indexing
+CREATE INDEX shipping_delivered_idx on shipping (delivered);
+CREATE INDEX shipping_location_idx ON shipping USING GIST (location);
+-- 
+-- 
+-- 
+-- Orders
+create table if not exists orders(
+    id bigserial primary key,
+    created_at timestamp with time zone,
+    updated_at timestamp with time zone,
+    grand_total integer not null,
+    serial_number text not null,
+    user_id bigint constraint fk_orders_user_id references users,
+    shipping_address bigint not null constraint fk_orders_shipping_address references shipping,
+    confirmed boolean default false
+
+);
+-- 
+-- indexing
+CREATE UNIQUE INDEX orders_id_idx on orders (id);
+CREATE UNIQUE INDEX orders_user_id_idx on orders (user_id);
+-- 
+-- 
 -- Ordered products
 create table if not exists order_products(
     id bigserial primary key,
@@ -118,9 +152,10 @@ create table if not exists order_products(
     deleted_at timestamp with time zone,
     quantity integer not null,
     total_price integer not null,
-    device_id text not null,
-    product_variant bigint constraint fk_order_products_product_variant references product_variants,
-    product_id bigint not null constraint fk_order_products_product_id references products
+    product_variants integer [],
+    product_id bigint not null constraint fk_order_products_product_id references products,
+    order_id bigint constraint fk_order_products_order_id references orders
+
 );
 -- Create trigger function
 CREATE OR REPLACE FUNCTION update_product_stock() RETURNS TRIGGER AS $$ BEGIN IF TG_OP = 'INSERT' THEN -- decrease product stock when a new order item is created
@@ -147,39 +182,7 @@ INSERT
     OR
 UPDATE
     OR DELETE ON order_products FOR EACH ROW EXECUTE FUNCTION update_product_stock();
--- 
--- Orders
-create table if not exists orders(
-    created_at timestamp with time zone,
-    updated_at timestamp with time zone,
-    grand_total integer not null,
-    serial_number text not null,
-    order_products_id bigint not null constraint fk_orders_order_products_id references order_products,
-    user_id bigint constraint fk_orders_user_id references users,
-    primary key (order_products_id)
-);
--- 
--- indexing
-CREATE UNIQUE INDEX orders_order_product_id_idx on orders (order_products_id);
--- 
--- 
--- Shipping
-create table if not exists shipping(
-    id bigserial primary key,
-    created_at timestamp with time zone,
-    updated_at timestamp with time zone,
-    deleted_at timestamp with time zone,
-    location geometry(POINT) not null,
-    user_id bigint constraint fk_shipping_user_id references users,
-    order_id bigint not null constraint fk_shipping_order_id references orders,
-    status text default 'pending'
-);
--- 
--- indexing
-CREATE UNIQUE INDEX shipping_order_id_idx on shipping (order_id);
-CREATE INDEX shipping_status_idx on shipping (status);
-CREATE INDEX shipping_location_idx ON shipping USING GIST (location);
--- 
+
 -- 
 --  Wishlist 
 create table if not exists wishlists(

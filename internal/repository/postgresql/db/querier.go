@@ -40,7 +40,7 @@ type Querier interface {
 	DeleteCategory(ctx context.Context, id int64) error
 	//
 	//
-	DeleteOrder(ctx context.Context, orderProductsID int64) error
+	DeleteOrder(ctx context.Context, id int64) error
 	//
 	//
 	DeleteOrderProduct(ctx context.Context, id int64) error
@@ -89,8 +89,6 @@ type Querier interface {
 	//
 	//
 	ListCategories(ctx context.Context) ([]*Categories, error)
-	//
-	//
 	ListOrderProducts(ctx context.Context) ([]*ListOrderProductsRow, error)
 	//
 	//
@@ -102,10 +100,14 @@ type Querier interface {
 	//
 	ListProducts(ctx context.Context) ([]*ListProductsRow, error)
 	//
-	ListShipping(ctx context.Context, status pgtype.Text) ([]*Shipping, error)
+	//
+	ListShipping(ctx context.Context) ([]*ListShippingRow, error)
 	//
 	//
 	ListUserOrders(ctx context.Context, userID pgtype.Int8) ([]*ListUserOrdersRow, error)
+	//
+	//
+	ListUserShipping(ctx context.Context, userID int64) ([]*ListUserShippingRow, error)
 	ListUsers(ctx context.Context) ([]*Users, error)
 	//
 	//
