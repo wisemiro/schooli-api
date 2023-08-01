@@ -66,24 +66,28 @@ set updated_at = current_timestamp,
     stock_count = @stock_count,
     category_id = @category_id,
     default_image = @default_image
-where id = $1;
+where id = $1
+    and deleted_at is null;
 -- 
 -- 
 -- name: ListProducts :many
 select *
 from products
-    left join categories c on c.id = products.id;
+    left join categories c on c.id = products.id
+where products.deleted_at is null;
 -- 
 -- 
 -- name: DiscountedProducts :many
 SELECT *
 from products
-where products.discount_price > 0;
+where products.discount_price > 0
+    and products.deleted_at is null;
 -- name: ProductsByCategory :many
 select *
 from products
 where category_id = $1
     and products.id > $2
+    and products.deleted_at is null
 order by products.created_at desc
 limit 50;
 -- 
@@ -143,7 +147,8 @@ WHERE products.id = $1;
 -- 
 -- 
 -- name: DeleteProduct :exec
-delete from products
+update products
+set deleted_at = current_timestamp
 where id = $1;
 -- 
 -- 

@@ -14,7 +14,7 @@ import (
 type ProductsService interface {
 	CreateProduct(ctx context.Context, pm models.Product) error
 	UpdateProduct(ctx context.Context, pm models.Product) error
-	DeleteProduct(ctx context.Context, productID int64) error
+	DeleteProduct(ctx context.Context, productID int64, productName string) any
 	AllProducts(ctx context.Context) ([]*models.Product, error)
 	DiscountedProducts(ctx context.Context) ([]*models.Product, error)
 	ByCategory(ctx context.Context, categoryID int64, lastID int64) ([]*models.Product, error)
@@ -73,10 +73,11 @@ func (sq *SQLStore) UpdateProduct(ctx context.Context, pm models.Product) error 
 	return nil
 }
 
-func (sq *SQLStore) DeleteProduct(ctx context.Context, productID int64) error {
+func (sq *SQLStore) DeleteProduct(ctx context.Context, productID int64, productName string) any {
 	if err := sq.store.DeleteProduct(ctx, productID); err != nil {
 		return resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "ProductService.Delete")
 	}
+
 	return nil
 }
 

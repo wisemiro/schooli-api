@@ -153,7 +153,8 @@ func (q *Queries) DeleteCategory(ctx context.Context, id int64) error {
 }
 
 const deleteProduct = `-- name: DeleteProduct :exec
-delete from products
+update products
+set deleted_at = current_timestamp
 where id = $1
 `
 
@@ -196,6 +197,7 @@ const discountedProducts = `-- name: DiscountedProducts :many
 SELECT id, created_at, updated_at, deleted_at, average_rating, name, price, discount_price, sku, description, stock_count, min_stock_count, category_id, total_ratings, total_view, default_image
 from products
 where products.discount_price > 0
+    and products.deleted_at is null
 `
 
 func (q *Queries) DiscountedProducts(ctx context.Context) ([]*Products, error) {
@@ -338,6 +340,7 @@ const listProducts = `-- name: ListProducts :many
 select products.id, products.created_at, products.updated_at, products.deleted_at, average_rating, products.name, price, discount_price, sku, description, stock_count, min_stock_count, category_id, total_ratings, total_view, default_image, c.id, c.created_at, c.updated_at, c.deleted_at, c.name, image
 from products
     left join categories c on c.id = products.id
+where products.deleted_at is null
 `
 
 type ListProductsRow struct {
@@ -655,6 +658,7 @@ select id, created_at, updated_at, deleted_at, average_rating, name, price, disc
 from products
 where category_id = $1
     and products.id > $2
+    and products.deleted_at is null
 order by products.created_at desc
 limit 50
 `
@@ -735,6 +739,7 @@ set updated_at = current_timestamp,
     category_id = $8,
     default_image = $9
 where id = $1
+    and deleted_at is null
 `
 
 type UpdateProductParams struct {

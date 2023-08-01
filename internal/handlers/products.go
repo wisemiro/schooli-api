@@ -52,7 +52,7 @@ func (rp *Repository) CreateCategory() http.HandlerFunc {
 	}
 }
 
-// TODO: Fix this, check nullable 
+// TODO: Fix this, check nullable
 func (rp *Repository) UpdateCategory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
@@ -240,7 +240,8 @@ func (rp *Repository) UpdateProduct() http.HandlerFunc {
 func (rp *Repository) DeleteProduct() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-		err := rp.store.DeleteProduct(r.Context(), int64(id))
+		productName := r.URL.Query().Get("product_name")
+		err := rp.store.DeleteProduct(r.Context(), int64(id), productName)
 		if err != nil {
 			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
 			web.Respond(r.Context(), w, r, e, e.Status)

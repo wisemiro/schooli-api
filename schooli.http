@@ -20,7 +20,7 @@ Content-Type: application/json
 
 
 {
-  "email": "wise@gmail.com",
+  "email": "test@gmail.com",
   "password": "password"
 }
 
@@ -34,3 +34,8 @@ Content-Type: application/json
 @refresh_token = {{login.response.body.data.refresh_token}}
 
 
+### Delete product
+DELETE {{url}}/api/v1/admin/products/4?product_name=cold
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
