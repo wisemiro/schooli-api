@@ -51,10 +51,53 @@ func (rp *Repository) CreateCategory() http.HandlerFunc {
 
 	}
 }
+
+// TODO: Fix this, check nullable 
 func (rp *Repository) UpdateCategory() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-		// TODO:
+		id, _ := strconv.Atoi(chi.URLParam(r, "id"))
+		d, file, err := r.FormFile("image")
+		if err != nil && err != http.ErrMissingFile {
+			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+			web.Respond(r.Context(), w, r, e, e.Status)
+			return
+		} else if d != nil {
+			fileContentType := file.Header["Content-Type"][0]
+			uploadFile, err := rp.storageService.UploadFile(r.Context(), models.FileUploadModel{
+				ObjName:     file.Filename,
+				FileBuf:     d,
+				FileSize:    file.Size,
+				ContentType: fileContentType,
+				FolderName:  r.FormValue("name"),
+			})
+			if err != nil {
+				e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+				web.Respond(r.Context(), w, r, e, e.Status)
+				return
+			}
+			err = rp.store.UpdateCategory(r.Context(), models.Category{
+				ID:    int64(id),
+				Name:  r.FormValue("name"),
+				Image: uploadFile.Key,
+			})
+			if err != nil {
+				e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+				web.Respond(r.Context(), w, r, e, e.Status)
+				return
+			}
+		}
+
+		err = rp.store.UpdateCategory(r.Context(), models.Category{
+			ID:   int64(id),
+			Name: r.FormValue("name"),
+		})
+		if err != nil {
+			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+			web.Respond(r.Context(), w, r, e, e.Status)
+			return
+		}
+		info := NewStatusOkResponse(SuccessMessage, nil)
+		render.Respond(w, r, info)
 	}
 }
 

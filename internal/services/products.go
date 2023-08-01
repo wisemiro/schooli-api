@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"schooli-api/internal/models"
 	"schooli-api/internal/repository/postgresql/db"
 	"schooli-api/pkg/resterrors"
@@ -276,6 +277,7 @@ func (sq *SQLStore) UpdateCategory(ctx context.Context, cm models.Category) erro
 		Name:  cm.Name,
 		Image: cm.Image,
 	}); err != nil {
+		log.Println(err)
 		return resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "ProductService.UpdateCategory")
 	}
 	return nil

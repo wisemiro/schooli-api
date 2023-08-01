@@ -132,11 +132,7 @@ func (sq *SQLStore) UpdateOrder(ctx context.Context, om models.Order) error {
 	if err != nil {
 		return resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "OrdersService.UpdateOrder")
 	}
-	// TODO: Get user device
-	device, err := sq.store.GetOneDevice(ctx, data.Int64)
-	if err != nil {
-		return nil //TODO: NO!
-	}
+	device, _ := sq.store.GetOneDevice(ctx, data.Int64)
 	if om.Confirmed {
 		return sq.worker.DistributeTaskSendNotification(ctx, models.Notifications{
 			DeviceID: int32(device.ID),

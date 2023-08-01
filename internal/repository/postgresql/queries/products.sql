@@ -5,10 +5,13 @@ values(current_timestamp, @name, @image);
 -- 
 -- name: UpdateCategory :exec
 update categories
-set updated_at = current_timestamp,
-    name = @name,
-    image = @image
-where id = $1;
+SET updated_at = current_timestamp,
+    name = COALESCE(@name::text, name),
+    image = CASE
+        WHEN @image::text IS NOT NULL THEN @image::text
+        ELSE image
+    END
+WHERE id = @id;
 -- 
 -- 
 -- name: ListCategories :many
@@ -73,7 +76,9 @@ from products
 -- 
 -- 
 -- name: DiscountedProducts :many
-SELECT * from products where products.discount_price > 0;
+SELECT *
+from products
+where products.discount_price > 0;
 -- name: ProductsByCategory :many
 select *
 from products
@@ -140,7 +145,6 @@ WHERE products.id = $1;
 -- name: DeleteProduct :exec
 delete from products
 where id = $1;
-
 -- 
 -- 
 -- name: CreateWishlist :exec
