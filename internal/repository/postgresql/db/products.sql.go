@@ -705,6 +705,73 @@ func (q *Queries) ProductsByCategory(ctx context.Context, arg ProductsByCategory
 	return items, nil
 }
 
+const searchProducts = `-- name: SearchProducts :many
+select id, created_at, updated_at, deleted_at, average_rating, name, price, discount_price, sku, description, stock_count, min_stock_count, category_id, total_ratings, total_view, default_image,
+    similarity (name, $1) as score
+from products
+where similarity (name, $1) > 0.4
+order by score desc
+`
+
+type SearchProductsRow struct {
+	ID            int64              `json:"id"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt     pgtype.Timestamptz `json:"deleted_at"`
+	AverageRating pgtype.Int4        `json:"average_rating"`
+	Name          string             `json:"name"`
+	Price         int32              `json:"price"`
+	DiscountPrice pgtype.Int4        `json:"discount_price"`
+	Sku           string             `json:"sku"`
+	Description   string             `json:"description"`
+	StockCount    int32              `json:"stock_count"`
+	MinStockCount int32              `json:"min_stock_count"`
+	CategoryID    int64              `json:"category_id"`
+	TotalRatings  int32              `json:"total_ratings"`
+	TotalView     pgtype.Int4        `json:"total_view"`
+	DefaultImage  string             `json:"default_image"`
+	Score         float32            `json:"score"`
+}
+
+// TODO: Delete stale order_products
+func (q *Queries) SearchProducts(ctx context.Context, similarity string) ([]*SearchProductsRow, error) {
+	rows, err := q.db.Query(ctx, searchProducts, similarity)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*SearchProductsRow{}
+	for rows.Next() {
+		var i SearchProductsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.AverageRating,
+			&i.Name,
+			&i.Price,
+			&i.DiscountPrice,
+			&i.Sku,
+			&i.Description,
+			&i.StockCount,
+			&i.MinStockCount,
+			&i.CategoryID,
+			&i.TotalRatings,
+			&i.TotalView,
+			&i.DefaultImage,
+			&i.Score,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCategory = `-- name: UpdateCategory :exec
 update categories
 SET updated_at = current_timestamp,

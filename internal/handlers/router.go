@@ -75,6 +75,7 @@ func (rp *Repository) SetupRouter() *chi.Mux {
 					r.Get("/images", rp.ListProductImages())
 					r.Delete("/images", rp.DeleteProductImages())
 					r.Delete("/image", rp.DeleteProductImage())
+					r.Post("/search", rp.SearchProducts())
 				})
 
 				// Product Variants
@@ -144,6 +145,7 @@ func (rp *Repository) SetupRouter() *chi.Mux {
 					r.Post("/", rp.AddWishlist())
 					r.Get("/ratings/{id}", rp.ProductRating())
 					r.Get("/images", rp.ListProductImages())
+					r.Post("/search", rp.SearchProducts())
 				})
 				// Wishlist
 				r.Route("/wishlist", func(r chi.Router) {

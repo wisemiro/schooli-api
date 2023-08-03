@@ -3,19 +3,14 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE EXTENSION postgis;
 -- enable raster support (for 3+)
 CREATE EXTENSION postgis_raster;
--- Enable Topology
-CREATE EXTENSION postgis_topology;
--- Enable PostGIS Advanced 3D
--- and other geoprocessing algorithms
--- sfcgal not available with all distributions
-CREATE EXTENSION postgis_sfcgal;
 -- fuzzy matching needed for Tiger
 CREATE EXTENSION fuzzystrmatch;
 -- rule based standardizer
 CREATE EXTENSION address_standardizer;
 -- Enable US Tiger Geocoder
 CREATE EXTENSION postgis_tiger_geocoder;
-
+-- 
+-- 
 create table if not exists schema_migrations (
     version bigint not null primary key,
     dirty boolean not null
@@ -93,6 +88,7 @@ CREATE UNIQUE INDEX products_name_idx on products (name);
 CREATE INDEX products_price_idx on products (price);
 CREATE INDEX products_stock_count_idx on products (stock_count);
 CREATE INDEX products_discount_price_idx on products (discount_price);
+CREATE INDEX idx_fts_name_trgm ON products USING gin(name gin_trgm_ops);
 -- 
 -- 
 --  Product variants
@@ -121,7 +117,6 @@ create table if not exists shipping(
 );
 -- 
 -- indexing
-CREATE INDEX shipping_delivered_idx on shipping (delivered);
 CREATE INDEX shipping_location_idx ON shipping USING GIST (location);
 -- 
 -- 
@@ -136,7 +131,6 @@ create table if not exists orders(
     user_id bigint constraint fk_orders_user_id references users,
     shipping_address bigint not null constraint fk_orders_shipping_address references shipping,
     confirmed boolean default false
-
 );
 -- 
 -- indexing
@@ -155,7 +149,6 @@ create table if not exists order_products(
     product_variants integer [],
     product_id bigint not null constraint fk_order_products_product_id references products,
     order_id bigint constraint fk_order_products_order_id references orders
-
 );
 -- Create trigger function
 CREATE OR REPLACE FUNCTION update_product_stock() RETURNS TRIGGER AS $$ BEGIN IF TG_OP = 'INSERT' THEN -- decrease product stock when a new order item is created
@@ -182,7 +175,6 @@ INSERT
     OR
 UPDATE
     OR DELETE ON order_products FOR EACH ROW EXECUTE FUNCTION update_product_stock();
-
 -- 
 --  Wishlist 
 create table if not exists wishlists(
@@ -259,4 +251,3 @@ create table if not exists product_specifications(
     description text not null,
     product_id bigint not null constraint fk_product_specifications_product_id references products
 );
-

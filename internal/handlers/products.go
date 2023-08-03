@@ -547,3 +547,35 @@ func (rp *Repository) DeleteProductImage() http.HandlerFunc {
 		web.Respond(r.Context(), w, r, e, e.Status)
 	}
 }
+
+func (rp *Repository) SearchProducts() http.HandlerFunc {
+	type request struct {
+		Name string `json:"name"`
+	}
+	type response struct {
+		Total    int `json:"total"`
+		Products any `json:"products"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req request
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			e := resterrors.NewBadRequestError("Failed to parse json")
+			web.Respond(r.Context(), w, r, e, e.Status)
+			return
+		}
+		products, err := rp.store.SearchProducts(r.Context(), req.Name)
+		if err != nil {
+			e := resterrors.NewBadRequestError(resterrors.ErrorProcessingRequest)
+			web.Respond(r.Context(), w, r, e, e.Status)
+			return
+		}
+
+		data := response{
+			Total:    len(products),
+			Products: products,
+		}
+		e := NewStatusOkResponse(SuccessMessage, data)
+		web.Respond(r.Context(), w, r, e, e.Status)
+	}
+}

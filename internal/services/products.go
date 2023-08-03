@@ -19,6 +19,7 @@ type ProductsService interface {
 	DiscountedProducts(ctx context.Context) ([]*models.Product, error)
 	ByCategory(ctx context.Context, categoryID int64, lastID int64) ([]*models.Product, error)
 	GetProduct(ctx context.Context, productID int64) (*models.Product, error)
+	SearchProducts(ctx context.Context, name string) ([]*models.Product, error)
 	//
 	//
 	// Wishlist
@@ -385,4 +386,28 @@ func (sq *SQLStore) GetVariant(ctx context.Context, varietyID int64) (*models.Pr
 		Name:      variant.Name,
 		ProductID: variant.ProductID,
 	}, nil
+}
+
+func (sq *SQLStore) SearchProducts(ctx context.Context, name string) ([]*models.Product, error) {
+	products, err := sq.store.SearchProducts(ctx, name)
+	if err != nil {
+		return nil, resterrors.WrapErrorf(err, resterrors.ECodeUnknown, "ProductService.SearchProducts")
+	}
+	productsList := make([]*models.Product, len(products))
+	for i, v := range products {
+		productsList[i] = &models.Product{
+			ID:            v.ID,
+			CreatedAt:     v.CreatedAt.Time,
+			UpdatedAt:     v.UpdatedAt.Time,
+			Name:          v.Name,
+			Price:         int64(v.Price),
+			DiscountPrice: int64(v.DiscountPrice.Int32),
+			Sku:           v.Sku,
+			Description:   v.Description,
+			StockCount:    int64(v.StockCount),
+			DefaultImage:  sq.fileStore.BuildFilePath(v.DefaultImage),
+			AverageRating: int(v.AverageRating.Int32),
+		}
+	}
+	return productsList, nil
 }

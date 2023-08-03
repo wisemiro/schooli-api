@@ -129,6 +129,10 @@ type Querier interface {
 	ProductSpecifications(ctx context.Context, productID int64) ([]*ProductSpecifications, error)
 	ProductsByCategory(ctx context.Context, arg ProductsByCategoryParams) ([]*Products, error)
 	//
+	// TODO: Delete stale order_products
+	//
+	SearchProducts(ctx context.Context, similarity string) ([]*SearchProductsRow, error)
+	//
 	//
 	UpdateCategory(ctx context.Context, arg UpdateCategoryParams) error
 	//

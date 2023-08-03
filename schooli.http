@@ -39,3 +39,12 @@ DELETE {{url}}/api/v1/admin/products/4?product_name=cold
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{auth_token}}
+
+### Searh Products
+POST  {{url}}/api/v1/client/products/search
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name":"cool"
+}

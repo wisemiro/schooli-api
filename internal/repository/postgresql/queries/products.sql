@@ -251,3 +251,10 @@ from product_specifications
 where product_id = $1;
 -- 
 -- TODO: Delete stale order_products
+-- 
+-- name: SearchProducts :many
+select *,
+    similarity (name, $1) as score
+from products
+where similarity (name, $1) > 0.4
+order by score desc;
